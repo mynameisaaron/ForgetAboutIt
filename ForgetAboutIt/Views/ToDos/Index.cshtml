@@ -1,0 +1,65 @@
+﻿
+@model ForgetAboutIt.ViewModels.ToDoViewModel
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+@using (Html.BeginForm("Add", "ToDos"))
+{
+    @Html.TextBoxFor(vm=>vm.Input)
+    <button class="btn btn-success submitbutton" type="submit">Submit</button>
+}
+<table class="table table-striped">
+    <tr>
+        <th>Description</th>
+        <th>Due Date</th>
+        <th>Remove</th>
+    </tr>
+    @foreach (var Todo in Model.ToDoList)
+    {
+        <tr>
+            <td>
+                @Todo.Description
+            </td>
+            @if (Todo.DueDate.HasValue)
+            {
+                <td>@Todo.DueDate.Value.ToString("dd MMM yyyy")</td>
+            }
+            else
+            {
+                <td> </td>
+            }
+            
+            <td><button href="#" data-js-id="@Todo.Id" class="btn btn-default todobutton">Remove</button></td>
+
+        </tr>
+    }
+</table>
+@section scripts
+{
+    <script>
+        $(document).ready(function() {
+
+            $("button.submitbutton").hover(function() {})
+            $("button.todobutton").hover(function() { $(this).removeClass("btn-default").addClass("btn-danger") },
+                function() { $(this).removeClass("btn-danger").addClass("btn-default") });
+
+
+            $("td").on("click",
+                "button.todobutton",
+                function() {
+                    var $todoid = $(this).attr("data-js-id");
+                    var $tablerow = $(this).parents("tr");
+
+                    $.ajax({
+                            url: "/api/todos/" + $todoid,
+                            method: "DELETE"
+                        })
+                        .done(function() { $tablerow.remove() });
+
+                });
+        });
+    </script>
+}
